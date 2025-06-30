@@ -1,12 +1,3 @@
-# prioridad_cliente.py — rango interactivo, sin NaN en la salida
-# -----------------------------------------------------------------------------
-# Pide al usuario fechas dd/mm/yyyy (opcional) y genera un CSV titulado:
-#   • ClientesPrioridad_<desde>_a_<hasta>.csv
-#   • ClientesPrioridad_desde_<desde>.csv
-#   • ClientesPrioridad_hasta_<hasta>.csv
-#   • ClientesPrioridad.csv (si no se dan fechas)
-# -----------------------------------------------------------------------------
-
 import pandas as pd
 import unicodedata, re
 from pathlib import Path
@@ -28,8 +19,8 @@ desde_dt = ask_date("Fecha DESDE (dd/mm/yyyy) o Enter para histórico: ")
 hasta_dt = ask_date("Fecha HASTA (dd/mm/yyyy) o Enter para hoy: ")
 
 # ------------------------------ Archivos ------------------------------------
-PEDIDOS_FILE    = Path('Pedidos.csv')
-CANCELADOS_FILE = Path('PedidosCancelados.csv')
+PEDIDOS_FILE    = Path('csv/Pedidos.csv')
+CANCELADOS_FILE = Path('csv/PedidosCancelados.csv')
 
 print("\n→ Cargando CSV…")
 pedidos_df    = pd.read_csv(PEDIDOS_FILE,    low_memory=False)
@@ -107,13 +98,13 @@ clientes_df['CLIENTE'] = clientes_df['CLIENTE_KEY'].map(map_orig).fillna(cliente
 # ------------------------------ Exportar ------------------------------------
 # Construir nombre de archivo según rango
 if desde_dt and hasta_dt:
-    file_name = f"ClientesPrioridad_{desde_dt.strftime('%Y-%m-%d')}_a_{hasta_dt.strftime('%Y-%m-%d')}.csv"
+    file_name = f"prioridad_clientes_{desde_dt.strftime('%Y-%m-%d')}_A_{hasta_dt.strftime('%Y-%m-%d')}.csv"
 elif desde_dt and not hasta_dt:
-    file_name = f"ClientesPrioridad_desde_{desde_dt.strftime('%Y-%m-%d')}.csv"
+    file_name = f"prioridad_clientes_desde_{desde_dt.strftime('%Y-%m-%d')}.csv"
 elif hasta_dt and not desde_dt:
-    file_name = f"ClientesPrioridad_hasta_{hasta_dt.strftime('%Y-%m-%d')}.csv"
+    file_name = f"prioridad_clientes_hasta_{hasta_dt.strftime('%Y-%m-%d')}.csv"
 else:
-    file_name = "ClientesPrioridad.csv"
+    file_name = "prioridad_clientes.csv"
 
 OUTPUT_FILE = Path(file_name)
 
