@@ -5,6 +5,10 @@ from datetime import datetime
 CSV_DIR      = Path("csv")
 PEDIDOS_CSV  = CSV_DIR / "Pedidos.csv"
 
+# VALOR = {1: 100, 2: 10, 3: 1} algoritmo Greedy
+# (ordenar por VALOR y tomar pedidos mientras quepan) garantiza que siempre se llenen primero los de
+# Prioridad 1, luego Prioridad 2 y por último Prioridad 3.
+
 VALOR = {1: 100, 2: 10, 3: 1}
 
 # ---------------- localizar prioridad_clientes*.csv -----------------
