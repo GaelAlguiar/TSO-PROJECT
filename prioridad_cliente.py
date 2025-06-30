@@ -85,7 +85,7 @@ clientes_df['Cancelaciones']    = clientes_df['Cancelaciones'].fillna(0).astype(
 # ------------------------------ Prioridad -----------------------------------
 clientes_df['Prioridad'] = 2
 clientes_df.loc[clientes_df['LitrosFacturados'] >= 5_000_000, 'Prioridad'] = 1
-mask_p3 = (clientes_df['Prioridad'] != 1) & (clientes_df['Cancelaciones'] > 15)
+mask_p3 = (clientes_df['Prioridad'] != 1) & (clientes_df['Cancelaciones'] > 5)
 clientes_df.loc[mask_p3, 'Prioridad'] = 3
 
 # ------------------------------ Nombre original -----------------------------
