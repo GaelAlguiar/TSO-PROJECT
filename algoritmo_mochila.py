@@ -1,7 +1,8 @@
-#!/usr/bin/env python3
-# algoritmo_mochila_optimo.py
 # ---------------------------------------------------------------
 # • Knapsack exacto OR-Tools (API nueva)               ✔
+# • biblioteca de código abierto desarrollada por Google que 
+# • incluye algoritmos avanzados de optimización —desde programación lineal
+# • y entera hasta rutas de vehículos y problemas de rango restringido como la “mochila” (knapsack)
 # • Back-log: reintenta hasta MAX_DIAS_ESPERA días      ✔
 # • Penalización 5 % a litros rentados                 ✔
 # • Pipas rentadas por día y validación de capacidad   ✔

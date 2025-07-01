@@ -1,3 +1,24 @@
+# -------------------------------------------------------------------
+# Generador de Prioridades de Clientes
+#
+# Este script prepara el ranking de clientes para el algoritmo de mochila:
+#  1. Carga Pedidos.csv y PedidosCancelados.csv en el rango indicado.
+#  2. Normaliza nombres y agrupa por cliente:
+#       • Suma litros facturados.
+#       • Cuenta cancelaciones.
+#  3. Aplica la regla de prioridad:
+#       – Prioridad 1: ≥ 5 000 000 L históricos.
+#       – Prioridad 3: (no 1) > 5 cancelaciones en el periodo.
+#       – Prioridad 2: el resto.
+#  4. Exporta prioridad_clientes_<rango>.csv con columnas:
+#       CLIENTE, LitrosFacturados, Cancelaciones, Prioridad
+#
+# El CSV resultante alimenta el modelo de optimización tipo mochila,
+# garantizando que los pedidos se asignen primero a los clientes con
+# mayor valor estratégico y menor riesgo de cancelación.
+# -------------------------------------------------------------------
+
+
 import pandas as pd
 import unicodedata, re
 from pathlib import Path

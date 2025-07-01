@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# resultados.py
 # ------------------------------------------------------------------
 # Compara utilidad previa y posterior al algoritmo-mochila:
 #  - Carga utilidad_previa_*.csv y utilidad_posterior_*.csv

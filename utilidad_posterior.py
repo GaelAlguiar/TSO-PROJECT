@@ -1,3 +1,12 @@
+# -------------------------------------------------------------------
+# Calcula la utilidad posterior mensual tras aplicar el algoritmo
+# de mochila y la penalización por litros rentados.
+# 'Utilidad_adj' refleja la utilidad neta después de descontar
+# el costo de renta (5 %) aplicado solo a los litros asignados
+# a pipas rentadas, permitiendo comparar la rentabilidad real
+# antes y después de la optimización.
+# -------------------------------------------------------------------
+
 import pandas as pd, re
 from pathlib import Path
 from datetime import datetime
