@@ -131,4 +131,30 @@ sel_df[pd.isna(sel_df["FECHA_ASIGNADA"])]\
 print("\nPipas rentadas por día:")
 for d,n in pipas_rentadas.items():
     print(f"{d}: {n} pipas")
+
 print(f"✓ Programación guardada. Fragmentos={len(fragmentos)}. Espera máx={MAX_DIAS_ESPERA}d, respetando FECHA_ENTREGA.")
+
+# --------------- exportar detalle por día (se selecciona el día) ------------------------
+fechas_disponibles = sel_df["FECHA_ASIGNADA"].dropna().dt.date.unique()
+print("\n Fechas con pedidos asignados:")
+print(", ".join(str(f) for f in sorted(fechas_disponibles)))
+
+fecha_input = input("\n Ingrese una fecha asignada (YYYY-MM-DD) para exportar mochila de ese día: ").strip()
+
+if not fecha_input:
+    print("No se ingresó ninguna fecha.")
+else:
+    try:
+        fecha_obj = pd.to_datetime(fecha_input).date()
+        detalles_dia = sel_df[sel_df["FECHA_ASIGNADA"].dt.date == fecha_obj]
+
+        if detalles_dia.empty:
+            print(f"No hay pedidos asignados el {fecha_obj}.")
+        else:
+            cols = ["ID", "CLIENTE", "FECHA", "PRIORIDAD", "LITROS", "GANANCIA", "GANANCIA_AJUST", "LITROS_RENTADOS"]
+            out_path = CSV_DIR / f"detalle_mochila_{fecha_obj}.csv"
+            detalles_dia[cols].to_csv(out_path, index=False)
+            print(f" Exportado: {out_path.name} ({len(detalles_dia)} pedidos)")
+
+    except Exception as e:
+        print(f"Error al interpretar la fecha: {e}")
