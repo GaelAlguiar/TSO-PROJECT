@@ -75,7 +75,6 @@ for fecha, grupo in df.groupby("FECHA_ASIGNADA"):
 
         rows.append({
             "FechaAsignada":   dia,
-            "FechaEntrega":    p["FECHA_ENTREGA"].date(),
             "PedidoID":        p["ID"],
             "Cliente":         p["CLIENTE"],
             "Prioridad":       p["PRIORIDAD"],
