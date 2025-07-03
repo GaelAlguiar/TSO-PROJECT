@@ -136,11 +136,11 @@ print(f"✓ Programación guardada. Fragmentos={len(fragmentos)}. Espera máx={M
 
 # --------------- exportar detalle por día (múltiples fechas) ------------------------
 fechas_disponibles = sel_df["FECHA_ASIGNADA"].dropna().dt.date.unique()
-print("\n📅 Fechas con pedidos asignados:")
+print("\nFechas con pedidos asignados:")
 print(", ".join(str(f) for f in sorted(fechas_disponibles)))
 
 while True:
-    fecha_input = input("\n📆 Ingrese una fecha asignada (YYYY-MM-DD) para exportar mochila de ese día (o escriba 'salir'): ").strip()
+    fecha_input = input("\nIngrese una fecha asignada (YYYY-MM-DD) para exportar mochila de ese día (o escriba 'salir'): ").strip()
     if fecha_input.lower() == "salir":
         break
     if not fecha_input:
@@ -156,8 +156,8 @@ while True:
             cols = ["ID", "CLIENTE", "FECHA", "PRIORIDAD", "LITROS", "GANANCIA", "GANANCIA_AJUST", "LITROS_RENTADOS"]
             out_path = CSV_DIR / f"detalle_mochila_{fecha_obj}.csv"
             detalles_dia[cols].to_csv(out_path, index=False)
-            print(f"✅ Exportado: {out_path.name} ({len(detalles_dia)} pedidos)")
+            print(f"Exportado: {out_path.name} ({len(detalles_dia)} pedidos)")
             ganancia_total = detalles_dia["GANANCIA_AJUST"].sum()
-            print(f"💰 Ganancia total ajustada del {fecha_obj}: ${ganancia_total:,.2f}")
+            print(f"Ganancia total ajustada del {fecha_obj}: ${ganancia_total:,.2f}")
     except Exception as e:
         print(f"⚠️ Error al interpretar la fecha: {e}")
