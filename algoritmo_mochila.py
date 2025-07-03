@@ -33,7 +33,7 @@ if not m: sys.exit("El nombre de prioridad debe contener rango _YYYY-MM-DD_A_YYY
 desde_dt, hasta_dt = map(datetime.fromisoformat, m.groups())
 
 print("Prioridades :", prior_csv.name)
-print("Pedidos      :", ped_csv.name)
+print("Pedidos     :", ped_csv.name)
 
 # --------------- cargar y fragmentar ------------------------------
 prio_map = pd.read_csv(prior_csv).set_index("CLIENTE")["Prioridad"]
@@ -134,27 +134,30 @@ for d,n in pipas_rentadas.items():
 
 print(f"✓ Programación guardada. Fragmentos={len(fragmentos)}. Espera máx={MAX_DIAS_ESPERA}d, respetando FECHA_ENTREGA.")
 
-# --------------- exportar detalle por día (se selecciona el día) ------------------------
+# --------------- exportar detalle por día (múltiples fechas) ------------------------
 fechas_disponibles = sel_df["FECHA_ASIGNADA"].dropna().dt.date.unique()
-print("\n Fechas con pedidos asignados:")
+print("\n📅 Fechas con pedidos asignados:")
 print(", ".join(str(f) for f in sorted(fechas_disponibles)))
 
-fecha_input = input("\n Ingrese una fecha asignada (YYYY-MM-DD) para exportar mochila de ese día: ").strip()
-
-if not fecha_input:
-    print("No se ingresó ninguna fecha.")
-else:
+while True:
+    fecha_input = input("\n📆 Ingrese una fecha asignada (YYYY-MM-DD) para exportar mochila de ese día (o escriba 'salir'): ").strip()
+    if fecha_input.lower() == "salir":
+        break
+    if not fecha_input:
+        print("⚠️ No se ingresó ninguna fecha.")
+        continue
     try:
         fecha_obj = pd.to_datetime(fecha_input).date()
         detalles_dia = sel_df[sel_df["FECHA_ASIGNADA"].dt.date == fecha_obj]
 
         if detalles_dia.empty:
-            print(f"No hay pedidos asignados el {fecha_obj}.")
+            print(f"⚠️ No hay pedidos asignados el {fecha_obj}.")
         else:
             cols = ["ID", "CLIENTE", "FECHA", "PRIORIDAD", "LITROS", "GANANCIA", "GANANCIA_AJUST", "LITROS_RENTADOS"]
             out_path = CSV_DIR / f"detalle_mochila_{fecha_obj}.csv"
             detalles_dia[cols].to_csv(out_path, index=False)
-            print(f" Exportado: {out_path.name} ({len(detalles_dia)} pedidos)")
-
+            print(f"✅ Exportado: {out_path.name} ({len(detalles_dia)} pedidos)")
+            ganancia_total = detalles_dia["GANANCIA_AJUST"].sum()
+            print(f"💰 Ganancia total ajustada del {fecha_obj}: ${ganancia_total:,.2f}")
     except Exception as e:
-        print(f"Error al interpretar la fecha: {e}")
+        print(f"⚠️ Error al interpretar la fecha: {e}")
