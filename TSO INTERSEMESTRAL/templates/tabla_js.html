@@ -117,7 +117,7 @@
 
     <script>
       (async () => {
-        /* 1️⃣  Obtener datos del API */
+        /* Obtener datos del API */
         const resp = await fetch("{{ api_url }}");
         const payload = await resp.json();
         console.log("Respuesta del API →", payload); // DEBUG
@@ -135,18 +135,27 @@
           return;
         }
 
-        /* 2️⃣  Definir columnas Tabulator */
         const cols = columns
-          .filter((c) => c && c.trim() !== "") // evita columnas vacías
-          .map((col) => ({
-            title: col.replace(/_/g, " "),
-            field: col,
-            headerFilter: "input",
-            formatter: /^FECHA/i.test(col) ? "datetime" : undefined,
-            sorter: /^FECHA/i.test(col) ? "date" : "string",
-          }));
+          .filter((c) => c && c.trim() !== "")
+          .map((col) => {
+            const isFecha = /^FECHA/i.test(col);
+            return {
+              title: col.replace(/_/g, " "),
+              field: col,
+              headerFilter: "input",
+              sorter: isFecha ? "date" : "string",
+              formatter: isFecha ? "datetime" : undefined,
+              formatterParams: isFecha
+                ? {
+                    inputFormat: "yyyy-MM-dd", // cómo viene en el CSV
+                    outputFormat: "dd/MM/yyyy", // cómo mostrar
+                    invalidPlaceholder: "—",
+                  }
+                : undefined,
+            };
+          });
 
-        /* 3️⃣  Instanciar la tabla */
+        /* Instanciar la tabla */
         const table = new Tabulator("#table", {
           data: rows,
           columns: cols,
@@ -160,7 +169,7 @@
           initialSort: [{ column: columns[0], dir: "asc" }],
         });
 
-        /* 4️⃣  Buscador global */
+        /* Buscador global */
         document.getElementById("search").addEventListener("input", (e) => {
           const q = e.target.value.toLowerCase();
           table.setFilter((row) =>
@@ -168,7 +177,7 @@
           );
         });
 
-        /* 5️⃣  Descarga CSV */
+        /* Descarga CSV */
         document.getElementById("download").onclick = () => {
           table.download("csv", "{{ titulo|replace(' ','_')|lower }}.csv");
         };

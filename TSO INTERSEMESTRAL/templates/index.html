@@ -3,11 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Dashboard Mochila - Enerey</title>
+    <title>Dashboard Mochila – Enerey</title>
+
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='style.css') }}"
     />
+
     <style>
       :root {
         --verde-principal: #65ada3;
@@ -18,41 +20,35 @@
         --naranja: #ff9800;
         --naranja-hover: #f57c00;
       }
-
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
       }
-
       body {
         font-family: "Segoe UI", sans-serif;
         background-color: var(--fondo);
         color: #333;
       }
-
       header {
-        background-color: var(--verde-principal);
-        color: white;
+        background: var(--verde-principal);
+        color: #fff;
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: 15px 40px;
         width: 100%;
       }
-
       header img {
         height: 45px;
       }
-
       nav a {
-        color: white;
+        color: #fff;
         text-decoration: none;
         margin-left: 30px;
         font-weight: 500;
-        transition: all 0.3s;
+        transition: 0.3s;
       }
-
       nav a:hover {
         text-decoration: underline;
       }
@@ -63,20 +59,17 @@
         flex-direction: column;
         gap: 30px;
       }
-
       .card {
-        background: white;
+        background: #fff;
         padding: 30px;
         border-radius: 14px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        transition: transform 0.4s ease, box-shadow 0.4s ease;
+        transition: 0.4s transform, 0.4s box-shadow;
       }
-
       .card:hover {
         transform: scale(1.03);
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
       }
-
       .card h2 {
         color: var(--verde-secundario);
         margin-bottom: 20px;
@@ -89,72 +82,107 @@
         flex-wrap: wrap;
         gap: 12px;
       }
-
       .botones a,
       .acciones button,
       form button,
       .generar {
-        background-color: var(--verde-boton);
-        color: white;
+        background: var(--verde-boton);
+        color: #fff;
         padding: 12px 18px;
         border: none;
         border-radius: 6px;
         cursor: pointer;
         text-decoration: none;
         font-size: 15px;
-        transition: all 0.3s ease;
+        transition: 0.3s;
       }
-
       .botones a:hover,
       .acciones button:hover,
       form button:hover {
-        background-color: var(--verde-hover);
+        background: var(--verde-hover);
         transform: scale(1.05);
       }
-
       .generar {
-        background-color: var(--naranja);
+        background: var(--naranja);
         font-weight: bold;
       }
-
       .generar:hover {
-        background-color: var(--naranja-hover);
+        background: var(--naranja-hover);
         transform: scale(1.05);
       }
 
       footer {
-        background-color: var(--verde-principal);
-        color: white;
+        background: var(--verde-principal);
+        color: #fff;
         text-align: center;
         padding: 15px;
         font-size: 14px;
         width: 100%;
       }
-
       @media (max-width: 768px) {
         nav {
           display: none;
         }
-
         .botones,
         .acciones {
           flex-direction: column;
           gap: 10px;
         }
-
         main {
           padding: 20px;
         }
       }
-      .icono-recargar {
-        background: none;
+
+      /* date-wrapper ahora va centrado dentro de la tarjeta */
+      .date-wrapper {
+        display: flex;
+        justify-content: center; /* ⬅️  centrado horizontal */
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+
+      /* input-date: ancho auto y padding para que no tape el botón */
+      .input-date {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        border: 2px solid var(--verde-boton);
+        border-radius: 8px;
+        padding: 6px 12px;
+        background: #fff;
+      }
+
+      /* input date ocupa solo lo necesario (el 100% sobraba) */
+      .input-date input[type="date"] {
         border: none;
-        color: var(--verde-boton);
-        font-size: 20px;
+        outline: none;
+        font-size: 15px;
+        background: transparent;
+        color: #333;
+        min-width: 160px;
+        width: auto;
+      }
+
+      .icono-recargar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px; /* igual que el calendario de Chrome */
+        background: transparent;
+        border: none;
+        color: #000;
+        font-size: 18px; /* mismo tono que el ícono nativo */
         cursor: pointer;
-        margin-left: 6px;
-        vertical-align: middle;
-        transition: transform 0.3s ease, color 0.3s ease;
+        transition: 0.25s transform;
+      }
+      .icono-recargar:hover {
+        transform: rotate(90deg);
+      }
+      .icono-recargar:active {
+        transform: rotate(180deg);
       }
     </style>
   </head>
@@ -167,8 +195,6 @@
       />
       <nav>
         <a href="#">Inicio</a>
-        <a href="#graficas">Gráficas</a>
-        <a href="#algoritmo">Algoritmo</a>
       </nav>
     </header>
 
@@ -177,19 +203,25 @@
       <div class="card" id="resumen">
         <h2>Resumen General</h2>
 
-        <!-- ⇢ ya NO tiene botón submit -->
-        <form style="margin-bottom: 15px">
-          <label for="fecha">Selecciona una fecha (YYYY-MM-DD):</label><br />
+        <form>
+          <div class="date-wrapper">
+            <label for="fecha"
+              ><i class="fa-regular fa-calendar"></i> Fecha:</label
+            >
 
-          <input type="date" name="fecha" required />
-          <button
-            type="button"
-            class="icono-recargar"
-            title="Actualizar página"
-            onclick="location.reload()"
-          >
-            &#x21bb;
-          </button>
+            <div class="input-date">
+              <input type="date" id="fecha" name="fecha" required />
+
+              <!-- Icono recarga -->
+              <button
+                type="button"
+                title="Actualizar página"
+                onclick="location.reload()"
+              >
+                <i class="fa-regular fa-calendar"></i>
+              </button>
+            </div>
+          </div>
         </form>
       </div>
 
@@ -206,18 +238,41 @@
         </div>
       </div>
 
-      <!--──────────  ALGORITMO  ──────────-->
-      <div class="card" id="algoritmo">
-        <h2>Algoritmo de Optimización (Mochila)</h2>
-        <!-- este es el único botón que ejecuta -->
-        <form action="{{ url_for('ejecutar_mochila') }}" method="post">
-          <button class="generar" type="submit">
-            Ejecutar Algoritmo Mochila
-          </button>
-        </form>
-      </div>
+      <form
+        id="form-mochila"
+        action="{{ url_for('ejecutar_mochila') }}"
+        method="post"
+      >
+        <input type="hidden" name="fecha_ejec" id="fecha_ejec" />
+        <button class="generar" type="submit">
+          Ejecutar Algoritmo Mochila
+        </button>
+      </form>
+
+      <script>
+        // copia la fecha seleccionada antes de enviar el form
+        document
+          .getElementById("form-mochila")
+          .addEventListener("submit", (e) => {
+            const fecha = document.getElementById("fecha").value;
+            if (!fecha) {
+              e.preventDefault();
+              alert("Selecciona primero una fecha.");
+              return;
+            }
+            document.getElementById("fecha_ejec").value = fecha;
+          });
+      </script>
     </main>
 
     <footer>Desarrollado por el Equipo 2 · ENEREY LATAM © 2025</footer>
+
+    <!-- Font Awesome JS (solo iconos dinámicos, opcional) -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"
+      integrity="sha512-8EdQFBgiKi/+RfVfmJrVL0Nx4OHliw8hhaQDvGkgGKS0v7tV4FPCfPTadDD2QIbkJxa6QNKSpyfK/1vY3G7XIQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
   </body>
 </html>

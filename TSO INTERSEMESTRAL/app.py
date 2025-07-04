@@ -251,11 +251,47 @@ def tabla_pedidos_cancelados():
                            titulo="Pedidos Cancelados",
                            api_url=url_for("api_pedidos_cancelados"))
 
-
 @app.route('/ejecutar_mochila', methods=['POST'])
 def ejecutar_mochila():
-    mensaje = algoritmo_mochila.ejecutar()
-    return render_template('resultado.html', mensaje=mensaje)
+    fecha_str = request.form.get("fecha_ejec")      # viene del formulario
+    mensaje   = algoritmo_mochila.ejecutar()        # corre la mochila
+
+    # si no hay fecha, solo mostramos el mensaje global
+    if not fecha_str:
+        return render_template("resultado.html", mensaje=mensaje)
+
+    try:
+        fecha   = datetime.strptime(fecha_str,"%Y-%m-%d").date()
+        archivo = f"detalle_mochila_{fecha}.csv"
+        ruta    = Path(DETALLE_DIR) / archivo
+
+        # ── si aún no existe, créalo a partir de la programación global ──
+        if not ruta.exists():
+            # programacion más reciente
+            prog = sorted(Path(DETALLE_DIR).glob("programacion_*.csv"), reverse=True)[0]
+            df_total = pd.read_csv(prog)
+            df_total.columns = df_total.columns.str.replace(" ","_").str.upper()
+            df_total["FECHA_ASIGNADA"] = pd.to_datetime(df_total["FECHA_ASIGNADA"],
+                                                        errors="coerce")
+            df_dia = df_total[df_total["FECHA_ASIGNADA"].dt.date == fecha]
+
+            cols = [c for c in ["ID","CLIENTE","FECHA","PRIORIDAD","LITROS",
+                                "GANANCIA","GANANCIA_AJUST","LITROS_RENTADOS"]
+                    if c in df_dia.columns]
+            df_dia[cols].to_csv(ruta, index=False)
+
+        # ── cargar el detalle y enviarlo a la plantilla ──
+        df = pd.read_csv(ruta)
+        return render_template("resultado.html",
+                               mensaje=f"Detalle de mochila · {fecha}",
+                               tabla=df.to_html(classes="table", index=False))
+
+    except Exception as e:
+        # si algo falla, al menos mostrar el mensaje global
+        return render_template("resultado.html",
+                               mensaje=f"{mensaje}<br>⚠️ {e}",
+                               tabla="")
+
 
 if __name__ == '__main__':
     app.run(debug=True)
