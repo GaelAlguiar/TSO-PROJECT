@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard Mochila - Enerey</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <style>
+      :root {
+        --verde-principal: #65ada3;
+        --verde-secundario: #2e7d32;
+        --verde-boton: #4caf50;
+        --verde-hover: #388e3c;
+        --fondo: #f2fef2;
+        --naranja: #ff9800;
+        --naranja-hover: #f57c00;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background-color: var(--fondo);
+        color: #333;
+      }
+
+      header {
+        background-color: var(--verde-principal);
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 40px;
+        width: 100%;
+      }
+
+      header img {
+        height: 45px;
+      }
+
+      nav a {
+        color: white;
+        text-decoration: none;
+        margin-left: 30px;
+        font-weight: 500;
+        transition: all 0.3s;
+      }
+
+      nav a:hover {
+        text-decoration: underline;
+      }
+
+      main {
+        padding: 40px 5%;
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+      }
+
+      .card {
+        background: white;
+        padding: 30px;
+        border-radius: 14px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        transition: transform 0.4s ease, box-shadow 0.4s ease;
+      }
+
+      .card:hover {
+        transform: scale(1.03);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      }
+
+      .card h2 {
+        color: var(--verde-secundario);
+        margin-bottom: 20px;
+        font-size: 22px;
+      }
+
+      .botones,
+      .acciones {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .botones a,
+      .acciones button,
+      form button,
+      .generar {
+        background-color: var(--verde-boton);
+        color: white;
+        padding: 12px 18px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        text-decoration: none;
+        font-size: 15px;
+        transition: all 0.3s ease;
+      }
+
+      .botones a:hover,
+      .acciones button:hover,
+      form button:hover {
+        background-color: var(--verde-hover);
+        transform: scale(1.05);
+      }
+
+      .generar {
+        background-color: var(--naranja);
+        font-weight: bold;
+      }
+
+      .generar:hover {
+        background-color: var(--naranja-hover);
+        transform: scale(1.05);
+      }
+
+      footer {
+        background-color: var(--verde-principal);
+        color: white;
+        text-align: center;
+        padding: 15px;
+        font-size: 14px;
+        width: 100%;
+      }
+
+      @media (max-width: 768px) {
+        nav {
+          display: none;
+        }
+
+        .botones,
+        .acciones {
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        main {
+          padding: 20px;
+        }
+      }
+      .icono-recargar {
+        background: none;
+        border: none;
+        color: var(--verde-boton);
+        font-size: 20px;
+        cursor: pointer;
+        margin-left: 6px;
+        vertical-align: middle;
+        transition: transform 0.3s ease, color 0.3s ease;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <img
+        src="{{ url_for('static', filename='Logo Enerey.png') }}"
+        alt="Logo Enerey"
+      />
+      <nav>
+        <a href="#">Inicio</a>
+        <a href="#graficas">Gráficas</a>
+        <a href="#algoritmo">Algoritmo</a>
+      </nav>
+    </header>
+
+    <main>
+      <!--──────────  RESUMEN  ──────────-->
+      <div class="card" id="resumen">
+        <h2>Resumen General</h2>
+
+        <!-- ⇢ ya NO tiene botón submit -->
+        <form style="margin-bottom: 15px">
+          <label for="fecha">Selecciona una fecha (YYYY-MM-DD):</label><br />
+
+          <input type="date" name="fecha" required />
+          <button
+            type="button"
+            class="icono-recargar"
+            title="Actualizar página"
+            onclick="location.reload()"
+          >
+            &#x21bb;
+          </button>
+        </form>
+      </div>
+
+      <!--──────────  GRÁFICAS  ──────────-->
+      <div class="card" id="graficas">
+        <h2>Gráficas de Análisis</h2>
+        <div class="botones">
+          <a href="/programacion_detallada">Programación</a>
+          <a href="/grafica/utilidad_previa">Utilidad Previa</a>
+          <a href="/grafica/utilidad_posterior">Utilidad Posterior</a>
+          <a href="/grafica/utilidad_comparada">Utilidad Final</a>
+          <a href="/tabla/pedidos_limpios">Pedidos</a>
+          <a href="/tabla/pedidos_cancelados">Pedidos Cancelados</a>
+        </div>
+      </div>
+
+      <!--──────────  ALGORITMO  ──────────-->
+      <div class="card" id="algoritmo">
+        <h2>Algoritmo de Optimización (Mochila)</h2>
+        <!-- este es el único botón que ejecuta -->
+        <form action="{{ url_for('ejecutar_mochila') }}" method="post">
+          <button class="generar" type="submit">
+            Ejecutar Algoritmo Mochila
+          </button>
+        </form>
+      </div>
+    </main>
+
+    <footer>Desarrollado por el Equipo 2 · ENEREY LATAM © 2025</footer>
+  </body>
+</html>

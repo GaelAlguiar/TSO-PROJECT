@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{ titulo or 'Utilidad Previa' }}</title>
+
+    <!-- Chart.js + plugin de zoom -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.umd.min.js"></script>
+
+    <style>
+      :root {
+        --verde: #2e7d32;
+        --gris: #f4fdf4;
+        --sombra: 0 4px 16px rgba(0, 0, 0, 0.12);
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background: var(--gris);
+        color: var(--verde);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px 4vw;
+        min-height: 100vh;
+      }
+      h2 {
+        margin-bottom: 18px;
+        text-align: center;
+      }
+      .card {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: var(--sombra);
+        padding: 24px 28px;
+        max-width: 960px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+      }
+      canvas {
+        width: 100% !important;
+        height: 420px !important;
+      }
+      .controls {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .btn {
+        background: var(--verde);
+        border: none;
+        border-radius: 6px;
+        padding: 8px 14px;
+        font-size: 14px;
+        color: #fff;
+        cursor: pointer;
+        transition: 0.25s background;
+      }
+      .btn:hover {
+        background: #1b5e20;
+      }
+      a.volver {
+        margin-top: 32px;
+        text-decoration: none;
+        color: var(--verde);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h2>{{ titulo or 'Utilidad Previa' }}</h2>
+
+      <div class="controls">
+        <button id="toggleType" class="btn">Cambiar a Barras</button>
+        <button id="resetZoom" class="btn">Reset Zoom</button>
+        <button id="dl" class="btn">Descargar PNG</button>
+      </div>
+
+      <canvas id="chart"></canvas>
+    </div>
+
+    <a class="volver" href="{{ url_for('index') }}">← Volver al dashboard</a>
+
+    <script>
+      (async () => {
+        /* 1️⃣  Obtener datos desde la API JSON */
+        const resp = await fetch(
+          "{{ api_url | default(url_for('api_utilidad_previa')) }}"
+        );
+        const { labels, data, error } = await resp.json();
+        if (error) {
+          alert(error);
+          return;
+        }
+
+        /* 2️⃣  Configurar gráfico */
+        const ctx = document.getElementById("chart");
+        let tipo = "line";
+
+        const cfg = {
+          type: tipo,
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Utilidad ($)",
+                data,
+                backgroundColor: "rgba(46,125,50,.25)",
+                borderColor: "rgba(46,125,50,.9)",
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3,
+              },
+            ],
+          },
+          options: {
+            maintainAspectRatio: false,
+
+            /* ▼ Interacción de puntos y tooltips */
+            interaction: { mode: "nearest", intersect: false },
+
+            elements: {
+              point: {
+                radius: 5, // tamaño visible
+                hoverRadius: 7, // al pasar el cursor
+                hitRadius: 10, // área “clicable”
+              },
+            },
+
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                enabled: true,
+                callbacks: {
+                  label: (ctx) => `$ ${ctx.parsed.y.toLocaleString()}`,
+                },
+              },
+              zoom: {
+                pan: { enabled: true, mode: "x" },
+                zoom: {
+                  wheel: { enabled: true },
+                  pinch: { enabled: true },
+                  mode: "x",
+                },
+              },
+            },
+
+            scales: {
+              y: { ticks: { callback: (v) => `$${(v / 1000).toFixed(0)}k` } },
+            },
+          },
+        };
+
+        const chart = new Chart(ctx, cfg);
+
+        /* 3️⃣  Controles */
+        document.getElementById("toggleType").onclick = () => {
+          tipo = tipo === "line" ? "bar" : "line";
+          chart.config.type = tipo;
+          chart.update();
+          document.getElementById("toggleType").textContent =
+            tipo === "line" ? "Cambiar a Barras" : "Cambiar a Líneas";
+        };
+
+        document.getElementById("resetZoom").onclick = () => {
+          chart.resetZoom();
+        };
+
+        document.getElementById("dl").onclick = () => {
+          const link = document.createElement("a");
+          link.href = chart.toBase64Image();
+          link.download = "utilidad_previa.png";
+          link.click();
+        };
+      })();
+    </script>
+  </body>
+</html>

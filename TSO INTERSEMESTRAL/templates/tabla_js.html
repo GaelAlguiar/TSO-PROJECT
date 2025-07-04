@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{ titulo }}</title>
+
+    <!-- Luxon (requerido por Tabulator para formatter "datetime") -->
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+
+    <!-- Tabulator (tabla interactiva) -->
+    <link
+      href="https://unpkg.com/tabulator-tables@5.6.1/dist/css/tabulator.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://unpkg.com/tabulator-tables@5.6.1/dist/js/tabulator.min.js"></script>
+
+    <!-- Font Awesome (icono descarga) -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <style>
+      :root {
+        --verde: #2e7d32;
+        --gris: #f4fdf4;
+        --sombra: 0 4px 16px rgba(0, 0, 0, 0.12);
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background: var(--gris);
+        color: #333;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px 4vw;
+      }
+      .card {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: var(--sombra);
+        padding: 24px 28px;
+        max-width: 1200px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+      h2 {
+        text-align: center;
+        color: var(--verde);
+      }
+      #table {
+        height: 580px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+      }
+
+      .controls {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      input[type="search"] {
+        padding: 8px 12px;
+        border: 1px solid #aaa;
+        border-radius: 6px;
+        width: 260px;
+      }
+      .btn {
+        background: var(--verde);
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 14px;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .btn:hover {
+        background: #1b5e20;
+      }
+      a.volver {
+        margin-top: 32px;
+        text-decoration: none;
+        color: var(--verde);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h2>{{ titulo }}</h2>
+
+      <div class="controls">
+        <input id="search" type="search" placeholder="Buscar…" />
+        <button id="download" class="btn">
+          <i class="fa-solid fa-file-arrow-down"></i> Descargar CSV
+        </button>
+      </div>
+
+      <div id="table"></div>
+    </div>
+
+    <a class="volver" href="{{ url_for('index') }}">← Volver al dashboard</a>
+
+    <script>
+      (async () => {
+        /* 1️⃣  Obtener datos del API */
+        const resp = await fetch("{{ api_url }}");
+        const payload = await resp.json();
+        console.log("Respuesta del API →", payload); // DEBUG
+
+        const { columns = [], rows = [], error } = payload;
+
+        /* 1-bis: mensajes de error o sin filas */
+        if (error) {
+          alert(error);
+          return;
+        }
+        if (!rows.length) {
+          document.getElementById("table").innerHTML =
+            "<p style='text-align:center;margin-top:40px;'>⚠️ No hay registros para mostrar.</p>";
+          return;
+        }
+
+        /* 2️⃣  Definir columnas Tabulator */
+        const cols = columns
+          .filter((c) => c && c.trim() !== "") // evita columnas vacías
+          .map((col) => ({
+            title: col.replace(/_/g, " "),
+            field: col,
+            headerFilter: "input",
+            formatter: /^FECHA/i.test(col) ? "datetime" : undefined,
+            sorter: /^FECHA/i.test(col) ? "date" : "string",
+          }));
+
+        /* 3️⃣  Instanciar la tabla */
+        const table = new Tabulator("#table", {
+          data: rows,
+          columns: cols,
+          layout: "fitDataStretch",
+          reactiveData: true,
+          height: "100%",
+          pagination: "local",
+          paginationSize: 20,
+          paginationSizeSelector: [20, 50, 100],
+          movableColumns: true,
+          initialSort: [{ column: columns[0], dir: "asc" }],
+        });
+
+        /* 4️⃣  Buscador global */
+        document.getElementById("search").addEventListener("input", (e) => {
+          const q = e.target.value.toLowerCase();
+          table.setFilter((row) =>
+            JSON.stringify(row.getData()).toLowerCase().includes(q)
+          );
+        });
+
+        /* 5️⃣  Descarga CSV */
+        document.getElementById("download").onclick = () => {
+          table.download("csv", "{{ titulo|replace(' ','_')|lower }}.csv");
+        };
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{ titulo }}</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.umd.min.js"></script>
+
+    <style>
+      :root {
+        --verde: #2e7d32;
+        --gris: #f4fdf4;
+        --sombra: 0 4px 16px rgba(0, 0, 0, 0.12);
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background: var(--gris);
+        color: var(--verde);
+        padding: 40px 4vw;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .card {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: var(--sombra);
+        max-width: 960px;
+        width: 100%;
+        padding: 24px 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      h2 {
+        text-align: center;
+      }
+      .controls {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .btn {
+        background: var(--verde);
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 14px;
+        font-size: 14px;
+        cursor: pointer;
+      }
+      .btn:hover {
+        background: #1b5e20;
+      }
+      canvas {
+        width: 100% !important;
+        height: 420px !important;
+      }
+      a.volver {
+        margin-top: 32px;
+        text-decoration: none;
+        color: var(--verde);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h2>{{ titulo }}</h2>
+
+      <div class="controls">
+        <button id="resetZoom" class="btn">Reset Zoom</button>
+        <button id="dl" class="btn">Descargar PNG</button>
+      </div>
+
+      <canvas id="chart"></canvas>
+    </div>
+
+    <a class="volver" href="{{ url_for('index') }}">← Volver al dashboard</a>
+
+    <script>
+      (async () => {
+        /* 1. Consumir API */
+        const resp = await fetch("{{ api_url }}");
+        const { labels, prev_data, post_data, error } = await resp.json();
+        if (error) {
+          alert(error);
+          return;
+        }
+
+        /* 2. Configurar Chart.js con dos datasets */
+        const chart = new Chart(document.getElementById("chart"), {
+          type: "line",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Utilidad Previa",
+                data: prev_data,
+                borderColor: "rgba(33,150,243,.9)", // azul
+                backgroundColor: "rgba(33,150,243,.25)",
+                tension: 0.3,
+                fill: true,
+              },
+              {
+                label: "Utilidad Posterior",
+                data: post_data,
+                borderColor: "rgba(244,67,54,.9)", // rojo
+                backgroundColor: "rgba(244,67,54,.25)",
+                tension: 0.3,
+                fill: true,
+              },
+            ],
+          },
+          options: {
+            maintainAspectRatio: false,
+            interaction: { mode: "nearest", intersect: false },
+            elements: { point: { radius: 5, hoverRadius: 7, hitRadius: 10 } },
+            plugins: {
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => `$ ${ctx.parsed.y.toLocaleString()}`,
+                },
+              },
+              zoom: {
+                pan: { enabled: true, mode: "x" },
+                zoom: {
+                  wheel: { enabled: true },
+                  pinch: { enabled: true },
+                  mode: "x",
+                },
+              },
+            },
+            scales: {
+              y: { ticks: { callback: (v) => `$${(v / 1000).toFixed(0)}k` } },
+            },
+          },
+        });
+
+        /* 3. Controles */
+        document.getElementById("resetZoom").onclick = () => chart.resetZoom();
+        document.getElementById("dl").onclick = () => {
+          const link = document.createElement("a");
+          link.href = chart.toBase64Image();
+          link.download = "utilidad_comparada.png";
+          link.click();
+        };
+      })();
+    </script>
+  </body>
+</html>
